@@ -1,1 +1,1 @@
-# -32-bit-floating-point-adder
+# 32-bit-floating-point-adder
