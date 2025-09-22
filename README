@@ -1,5 +1,7 @@
 # 32-bit-floating-point-adder
 
+![image alt](image_url)
+
 High-Performance Pipelined IEEE 754 Floating-Point Adder in Verilog
 Overview:
 This repository contains the Verilog source code for a high-performance, 4-stage pipelined, 32-bit single-precision floating-point adder.
