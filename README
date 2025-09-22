@@ -1,1 +1,73 @@
 # 32-bit-floating-point-adder
+
+High-Performance Pipelined IEEE 754 Floating-Point Adder in Verilog
+Overview:
+This repository contains the Verilog source code for a high-performance, 4-stage pipelined, 32-bit single-precision floating-point adder.
+The design is compliant with the IEEE 754 standard and is optimized for implementation on FPGAs, targeting high clock frequencies and throughput.
+The project began as a Verilog implementation of the architecture described in the research paper, "Design Of High Performance IEEE-754 Single Precision (32 bit) Floating Point Adder Using Verilog" (IJERT, 2013). It was then evolved into a more robust, production-quality pipelined design to overcome the performance limitations of the original combinational model.
+This project is ideal for students, hardware engineers, and anyone interested in computer arithmetic, digital design, and FPGA implementation.
+
+Key Features:
+IEEE 754 Compliance: Supports 32-bit single-precision format.
+Pipelined Architecture: A 4-stage pipeline enables high clock speeds and increased throughput, making it suitable for high-performance applications.
+Full Add/Subtract Functionality: Supports both addition and subtraction operations.
+
+Comprehensive Special Case Handling:
+Correctly processes operations involving Infinity (Inf) and Not a Number (NaN).
+Handles Zero and Subnormal number inputs.
+High-Accuracy Rounding: Implements the default IEEE 754 rounding mode: "Round to Nearest, Ties to Even" using Guard, Round, and Sticky bits.
+Synthesizable and Verifiable: The code is written in synthesizable Verilog and includes a complete testbench for verification.
+Efficient Logic: Utilizes a leading zero counter and barrel shifters for fast normalization and alignment, which are far more efficient than simple iterative shifters.
+
+Architectural Evolution:
+The final design in this repository is the result of an iterative improvement process.
+Initial Version: Combinational Adder (based on the research paper)
+The first implementation was a direct Verilog translation of the architecture proposed in the source paper. It featured a single, large combinational logic block that performed all steps in one cycle.
+
+Pros: Simple to understand, directly reflects the paper's logic.
+
+Cons: Suffered from a very long combinational path delay. This severely limits the maximum clock frequency (low performance) and is not practical for modern, high-speed systems.
+
+Final Version: 4-Stage Pipelined Adder 
+To address the performance bottleneck, the design was re-architected into a 4-stage pipeline.
+This breaks the long combinational path into four smaller, faster stages, allowing the system to be clocked at a much higher frequency.
+This version also fixed several bugs and added more robust compliance with the IEEE 754 standard, particularly in handling subnormal numbers and rounding.
+
+Pipeline Stages Breakdown
+The final, corrected design (fp_adder_pipelined.v) is divided into the following four stages:
+
+Stage 1: Unpack & Special Case Detection
+Unpack: The 32-bit inputs (numberA, numberB) are deconstructed into sign, exponent, and mantissa.
+Special Case Detection: The logic checks if either input is a special value (NaN, Infinity, Zero, or Subnormal). If a special case that determines the outcome is detected (e.g., any + NaN), the result is immediately flagged and forwarded down the pipeline.
+Subnormal Handling: Subnormal numbers are identified, and their mantissas and exponents are prepared for the next stage.
+
+Stage 2: Pre-alignment
+Exponent Comparison: The exponents of the two numbers are compared to determine which is larger.
+Mantissa Shifting: The mantissa of the number with the smaller exponent is right-shifted by the difference in exponents. This ensures both numbers are aligned for addition.
+Sticky Bit Calculation: The logic calculates the Guard, Round, and Sticky (GRS) bits, which are essential for accurate rounding in the final stage.
+
+Stage 3: Add / Subtract
+Arithmetic Core: The aligned mantissas are either added or subtracted based on the effective operation.
+Sign Calculation: The sign of the result is determined. For subtraction, this involves finding the true sign after the operation is complete.
+
+Stage 4: Normalization & Rounding
+Leading Zero Counting: If the result of a subtraction is very small, a leading zero counter determines how many places the result must be shifted left to normalize it.
+
+Normalization: The result is shifted left or right to fit the IEEE 754 normalized format (i.e., 1.xxxx...). The exponent is adjusted accordingly.
+Rounding: The final result is rounded accurately using the GRS bits calculated in Stage 2.
+Packing: The final sign, exponent, and mantissa are assembled back into a 32-bit floating-point number.
+
+Files in This Repository
+fp_adder_pipelined.v
+The main Verilog source file for the final, corrected, 4-stage pipelined floating-point adder. It includes the leading_zero_counter module.
+
+fp_adder_pipelined_tb.v
+A comprehensive Verilog testbench designed to drive the pipelined adder. It applies inputs, waits for the 4-cycle pipeline latency, and verifies the output against expected results for a wide range of test cases.
+
+How to Use
+Prerequisites: You need a Verilog simulator (e.g., ModelSim, Vivado Simulator, Verilator, or an online tool like EDA Playground).
+
+Simulation:
+Add both fp_adder_pipelined.v and fp_adder_pipelined_tb.v to your simulation project.
+Set fp_adder_pipelined_tb as the top-level module.
+Run the simulation. The testbench will automatically apply a series of inputs and report whether each test PASSED or FAILED in the simulation console.
